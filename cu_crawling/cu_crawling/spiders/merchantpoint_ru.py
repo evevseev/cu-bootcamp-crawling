@@ -7,6 +7,12 @@ class MerchantpointRuSpider(scrapy.Spider):
     allowed_domains = ["merchantpoint.ru"]
     start_urls = ["https://merchantpoint.ru/brand/4390"]
 
+    custom_settings = {
+        "ITEM_PIPELINES": {
+            "cu_crawling.pipelines.CuCrawlingPipeline": 300,
+        }
+    }
+
     def parse(self, response: scrapy.http.Response):
         ord_desc = (
             response.xpath("//div[contains(@class, 'description_brand')]/text()")
