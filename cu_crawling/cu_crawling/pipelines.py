@@ -10,13 +10,15 @@ from itemadapter import ItemAdapter
 
 class CuCrawlingPipeline:
     def process_item(self, item: dict[str, str | None], spider):
+        item = item.copy()
+
         address = item.get("address")
         if address is not None:
-            item["address"] = address.split("—")[-1].strip()
+            item["address"] = address.split("-", 1)[-1].strip()
 
-        org_name = item.get("org_desc")
-        if org_name is not None:
-            item["org_desc"] = org_name.replace(item["org_name"], "").strip()
+        ord_desc = item.get("org_desc")
+        if ord_desc is not None:
+            item["org_desc"] = " ".join(ord_desc.split())
 
         merchant_name = item.get("merchant_name")
         if merchant_name is not None:
@@ -24,12 +26,12 @@ class CuCrawlingPipeline:
 
         mcc = item.get("mcc")
         if mcc is not None:
-            item["mcc"] = int(mcc)
+            item["mcc"] = int(mcc) # type: ignore
 
         geo_coordinates = item.get("geo_coordinates")
         if geo_coordinates is not None:
             item["geo_coordinates"] = tuple(
                 float(c) for c in geo_coordinates.split(", ")
-            )
+            ) # type: ignore
 
         return item

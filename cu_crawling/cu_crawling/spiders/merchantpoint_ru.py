@@ -1,24 +1,28 @@
 import scrapy
 import scrapy.http
+import scrapy.spiders
 
 
-class MerchantpointRuSpider(scrapy.Spider):
+class MerchantpointRuSpider(scrapy.spiders.SitemapSpider):
     name = "merchantpoint_ru"
     allowed_domains = ["merchantpoint.ru"]
-    start_urls = ["https://merchantpoint.ru/brand/4390"]
+
+    sitemap_urls = ["https://merchantpoint.ru/sitemap/brands.xml"]
+    sitemap_rules = [("/brand/", "parse")]
 
     custom_settings = {
         "ITEM_PIPELINES": {
-            "cu_crawling.pipelines.CuCrawlingPipeline": 300,
-        }
+            "cu_crawling.pipelines.CuCrawlingPipeline": 100,
+        },
+        "CLOSESPIDER_ITEMCOUNT": 30,
     }
 
     def parse(self, response: scrapy.http.Response):
-        ord_desc = (
-            response.xpath("//div[contains(@class, 'description_brand')]/text()")
-            .get()
-            .strip()
-        )  # type: ignore
+        ord_desc = response.xpath(
+            "//div[contains(@class, 'description_brand')]//text()"
+        ).getall()  # type: ignore
+        ord_desc = "\n".join(ord_desc).strip()
+
         merchant_urls = response.xpath(
             "//table[@class='finance-table']//a/@href"
         ).getall()
